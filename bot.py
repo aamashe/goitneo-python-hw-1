@@ -1,49 +1,36 @@
-def parse_input(user_input):
-    cmd, *args = user_input.split()
-    cmd = cmd.strip().lower()
-    return cmd, *args
+from datetime import datetime
 
 
-def add_contact(args, contacts):
-    name, phone = args
-    contacts[name] = phone
-    return "Contact added."
+def read_employees_from_file(users):
+    today = datetime.today().date()
+    birthdays = {}
+    for user in users:
+        name = user["name"]
+        birthday = user["birthday"].date()
+        birthday_this_year = birthday.replace(year=today.year)
+        if birthday_this_year < today:
+            birthday_this_year = birthday.replace(year=today.year + 1)
+        if (birthday_this_year - today).days < 7:
+            day_of_week = GetNameOfDay(birthday_this_year)
+            if day_of_week in birthdays:
+                birthdays[day_of_week].append(name)
+            else:
+                birthdays[day_of_week] = [name]
+    result = ""
+    for day, names in birthdays.items():
+        result += f"{day} {', '.join(names)}\n"
+
+    return result
 
 
-def change_phone(args, contacts):
-    name, phone = args
-    contacts[name] = phone
-    return "Contact changed."
-
-
-def get_contact(contacts, args):
-    name, = args
-    return contacts[name]
-
-
-def main():
-    contacts = {}
-    print("Welcome to the assistant bot!")
-    while True:
-        user_input = input("Enter a command: ")
-        command, *args = parse_input(user_input)
-
-        if command in ["close", "exit"]:
-            print("Good bye!")
-            break
-        elif command == "hello":
-            print("How can I help you?")
-        elif command == "add":
-            print(add_contact(args, contacts))
-        elif command == "change":
-            print(change_phone(args, contacts))
-        elif command == "phone":
-            print(get_contact(contacts, args))
-        elif command == "all":
-            print(contacts)
-        else:
-            print("Invalid command.")
+def GetNameOfDay(date):
+    return date.strftime('%A')
 
 
 if __name__ == "__main__":
-    main()
+    print(read_employees_from_file([
+        {"name": "Bill Gates", "birthday": datetime(1955, 10, 28)},
+        {"name": "Kalle", "birthday": datetime(1992, 10, 28)},
+        {"name": "Steve Jobs", "birthday": datetime(1955, 10, 28)},
+        {"name": "Anelia", "birthday": datetime(1996, 10, 29)}
+    ]))
